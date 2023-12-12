@@ -44,21 +44,30 @@ public class DemoApplication {
 
 			);
 			//filter using query with regex: Make shure you are using the correct format of 'QUERY'.
-			Query query = new Query();
-			query.addCriteria(Criteria.where("email").is(mail));
-			List<Student> students = mongoTemplate.find(query, Student.class);
-			if(students.size()>1){
-				throw new IllegalStateException("found many with this email."+mail);
-			}
-			if(students.isEmpty()){
-				System.out.println("Inserting student");
-				repository.insert(student);
-			}else{
-				System.out.println(student+"already exists");
-			}
+			//usingMongoTemplateAndQuery(repository, mongoTemplate, mail, student);
 
+			repository.findStudentByEmail(mail).ifPresentOrElse(s->{
+				System.out.println(student+"already exists.");
+			},()->{
+				System.out.println("Inserting student"+student);
+			});
 		};
 
+	}
+
+	private static void usingMongoTemplateAndQuery(StudentRepository repository, MongoTemplate mongoTemplate, String mail, Student student) {
+		Query query = new Query();
+		query.addCriteria(Criteria.where("email").is(mail));
+		List<Student> students = mongoTemplate.find(query, Student.class);
+		if(students.size()>1){
+			throw new IllegalStateException("found many with this email."+ mail);
+		}
+		if(students.isEmpty()){
+			System.out.println("Inserting student");
+			repository.insert(student);
+		}else{
+			System.out.println(student +"already exists");
+		}
 	}
 
 }
