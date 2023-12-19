@@ -70,7 +70,7 @@ public class DemoApplication {
 		}else{
 			System.out.println(student +"already exists");}}
 
-	private static Student NameandHours(StudentRepository repository, MongoTemplate mongoTemplate, String name, Gender gender){
+	private static Student NameandGenderc(StudentRepository repository, MongoTemplate mongoTemplate, String name, Gender gender){
 		Scanner scannerName = new Scanner(System.in);
 		System.out.println("Type the name of the student you want:");
 		name = scannerName.nextLine();
@@ -90,7 +90,7 @@ public class DemoApplication {
 		else{
 			System.out.println("An error...");
 		}
-		return students.get(0);
+		return students.getFirst();
 	}
 
 }
