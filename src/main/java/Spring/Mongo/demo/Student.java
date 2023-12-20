@@ -13,7 +13,8 @@ import java.util.Date;
 import java.util.List;
 
 @Data
-@Document
+
+@Document(collection = "student")
 public class Student {
 
     @Id
@@ -36,9 +37,9 @@ public class Student {
 
     private Date created;
 
-    public Student(String firstName, String lastName, String email, Gender gender, Adress adress, List<String> favouriteSubjects, BigDecimal totalSpentInBooks, Date created) {
+    public Student(String firstName, String LastName, String email, Gender gender, Adress adress, List<String> favouriteSubjects, BigDecimal totalSpentInBooks, Date created) {
         this.firstName = firstName;
-        LastName = lastName;
+        this.LastName = LastName;
         this.email = email;
         this.gender = gender;
         this.adress = adress;
