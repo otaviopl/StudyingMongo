@@ -7,7 +7,19 @@ import java.util.List;
 import java.util.Optional;
 
 public interface StudentRepository extends MongoRepository<Student,String> {
-    Optional<Student> findStudentByEmail(String email);
+    Optional<Student> findByEmail(String email);
 
+    List<Student> findByFirstNameAndGender(String firstName, Gender gender);
 
+    List<Student> findByFavouriteSubjects(List<String> favouriteSubjects);
 }
+
+
+
+
+
+
+
+
+
+

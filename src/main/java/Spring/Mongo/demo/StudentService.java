@@ -1,73 +1,162 @@
 package Spring.Mongo.demo;
 
-import Spring.Mongo.demo.Gender;
-import Spring.Mongo.demo.Student;
-import Spring.Mongo.demo.StudentRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-import java.util.Scanner;
+import java.math.BigDecimal;
+import java.time.Instant;
+import java.util.*;
 
 @Service
 public class StudentService {
 
-    private static StudentRepository studentRepository;
-    private static MongoTemplate mongoTemplate;
+    private  final StudentRepository studentRepository;
+    private final MongoTemplate mongoTemplate;
 
     @Autowired
     public StudentService(StudentRepository studentRepository, MongoTemplate mongoTemplate) {
-        StudentService.studentRepository = studentRepository;
-        StudentService.mongoTemplate = mongoTemplate;
+        this.studentRepository = studentRepository;
+        this.mongoTemplate = mongoTemplate;
     }
 
-    public static List<Student> getAllStudents() {
+    public  void createStudent(Scanner scanner) {
+        System.out.println("===== Create Student =====");
+        System.out.print("Enter first name: ");
+        String firstName = scanner.nextLine();
+        System.out.print("Enter last name: ");
+        String lastName = scanner.nextLine();
+        System.out.print("Enter email: ");
+        String email = scanner.nextLine();
+        System.out.print("Enter gender (Male/Female): ");
+        Gender gender = Gender.valueOf(scanner.nextLine());
+        System.out.print("Enter country: ");
+        String country = scanner.nextLine();
+        System.out.print("Enter state: ");
+        String state = scanner.nextLine();
+        System.out.print("Enter zip code: ");
+        String zipCode = scanner.nextLine();
+        Adress address = new Adress(country, state, zipCode);
+        System.out.print("Enter favorite subjects (comma-separated): ");
+        List<String> favoriteSubjects = List.of(scanner.nextLine().split(","));
+        System.out.print("Enter total spent in books: ");
+        BigDecimal totalSpentInBooks = scanner.nextBigDecimal();
+        scanner.nextLine();  // Consumir a quebra de linha após o próximo BigDecimal
+
+        Student newStudent = new Student(
+                firstName,
+                lastName,
+                email,
+                gender,
+                address,
+                favoriteSubjects,
+                totalSpentInBooks,
+                Date.from(Instant.now())
+        );
+        insertStudent(newStudent,email);}
+    public  void insertStudent(Student newStudent, String email){
+        studentRepository.findByEmail(email).ifPresentOrElse(
+                existingStudent -> System.out.println("Student already exists: " + existingStudent),
+                () -> {
+                    studentRepository.insert(newStudent);
+                    System.out.println("Student created: " + newStudent);});}
+
+
+    public  void deleteStudent(Scanner scanner) {
+        System.out.println("===== Delete Student =====");
+        System.out.print("Enter email of the student to delete: ");
+        String emailToDelete = scanner.nextLine();
+
+        studentRepository.findByEmail(emailToDelete).ifPresentOrElse(
+                existingStudent -> {
+                    System.out.println("Deleting student:");
+                    System.out.println(existingStudent);
+
+                    // Delete the student
+                    studentRepository.delete(existingStudent);
+                    System.out.println("Student deleted.");
+                },
+                () -> System.out.println("No student found with email: " + emailToDelete));
+    }
+
+    public  void updateStudent(Scanner scanner) {
+        System.out.println("===== Update Student =====");
+        System.out.print("Enter email of the student to update: ");
+        String emailToUpdate = scanner.nextLine();
+
+        studentRepository.findByEmail(emailToUpdate).ifPresentOrElse(
+                existingStudent -> {
+                    System.out.println("Current details of the student:");
+                    System.out.println(existingStudent);
+
+                    // Allow updating specific fields (for simplicity, let's just update the first name)
+                    System.out.print("Enter new first name: ");
+                    String newFirstName = scanner.nextLine();
+
+                    existingStudent.setFirstName(newFirstName);
+
+                    // Save the updated student
+                    studentRepository.save(existingStudent);
+                    System.out.println("Student updated: " + existingStudent);
+                },
+                () -> System.out.println("No student found with email: " + emailToUpdate)
+        );
+    }
+
+
+
+    public List<Student> getAllStudents() {
+        System.out.println("All students:"+ studentRepository.findAll());
         return studentRepository.findAll();
     }
-    public static Student getStudentByNameAndGender(String firstName, Gender gender){
-        Query query = new Query();
-        query.addCriteria(Criteria.where("firstName").is(firstName).and("gender").is(gender));
 
+    public Student getStudentByNameAndGender(String firstName, Gender gender) {
+        System.out.println("All students:"+ studentRepository.findByFirstNameAndGender(firstName, gender));
+        return studentRepository.findByFirstNameAndGender(firstName, gender).stream().findFirst().orElseThrow(() -> new IllegalStateException("No one found with these parameters"));
 
-        List<Student> students = mongoTemplate.find(query, Student.class);
-
-        if (students.size() > 1) {
-            throw new IllegalStateException("Found many with these parameters: " + students);
-        }
-
-        if (students.isEmpty()) {
-            throw new IllegalStateException("No one found with these parameters");
-        }
-
-            return students.getFirst();
     }
 
+    public Student getStudentByFavoriteSubjects(List<String> favouriteSubjects) {
+        System.out.println("All students:"+ studentRepository.findByFavouriteSubjects(favouriteSubjects));
+        return studentRepository.findByFavouriteSubjects(favouriteSubjects).stream().findFirst()
+                .orElseThrow(() -> new IllegalStateException("No one found with these parameters"));
+    }
 
+    public Student findStudentByFavoriteSubjects() {
+        Scanner scanner = new Scanner(System.in);
+        List<String> favouriteSubjects = new ArrayList<>();
 
-    public static Student findStudentByNameAndGender() {
+        System.out.println("Type the subject you want, press '/' to stop:");
 
-            Scanner scanner = new Scanner(System.in);
-            System.out.println("Type the name of the student you want:");
-            String name = scanner.nextLine();
+        while (true) {
+            String subject = scanner.nextLine();
 
-            System.out.println("Type the gender of the student:");
-            Gender gender = Gender.valueOf(scanner.nextLine());
+            if ("/".equals(subject)) {
+                break;
+            }
+            favouriteSubjects.add(subject);
+        }
+        System.out.println("Subjects selected: " + favouriteSubjects);
 
-            return getStudentByNameAndGender(name,gender);
+        return getStudentByFavoriteSubjects(favouriteSubjects);
+    }
 
+    public Student findStudentByNameAndGender() {
+        Scanner scanner = new Scanner(System.in);
+        System.out.println("Type the name of the student you want:");
+        String name = scanner.nextLine();
+
+        System.out.println("Type the gender of the student:");
+        Gender gender = Gender.valueOf(scanner.nextLine());
+
+        return getStudentByNameAndGender(name, gender);
     }
 
     public void existsEmail(String mail, Student student) {
-        Query query = new Query();
-        query.addCriteria(Criteria.where("email").is(mail));
-        List<Student> students = mongoTemplate.find(query, Student.class);
-        if (students.size() > 1) {
-            throw new IllegalStateException("found many with this email." + mail);
-        }
-        if (students.isEmpty()) {
+        Optional<Student> existingStudent = studentRepository.findByEmail(mail);
+        if (existingStudent.isEmpty()) {
             System.out.println("Inserting student");
             studentRepository.insert(student);
         } else {
