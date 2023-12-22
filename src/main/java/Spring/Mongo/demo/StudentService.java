@@ -22,6 +22,10 @@ public class StudentService {
         this.mongoTemplate = mongoTemplate;
     }
 
+public List<Student> findStudentByFirstName  (String firstName){
+    System.out.println("estudante:"+studentRepository.findStudentByFirstName(firstName));
+        return studentRepository.findStudentByFirstName(firstName);
+    }
     public  void createStudent(Scanner scanner) {
         System.out.println("===== Create Student =====");
         System.out.print("Enter first name: ");
@@ -74,11 +78,23 @@ public class StudentService {
                     System.out.println("Deleting student:");
                     System.out.println(existingStudent);
 
-                    // Delete the student
                     studentRepository.delete(existingStudent);
                     System.out.println("Student deleted.");
                 },
                 () -> System.out.println("No student found with email: " + emailToDelete));
+    }
+
+    public List<Student> findStudentByIntervalo(){
+        Scanner scanner = new Scanner(System.in);
+        System.out.println("Type the first value:");
+        BigDecimal FirstValue = BigDecimal.valueOf(Long.parseLong(scanner.nextLine()));
+        System.out.println("Type the first value:");
+        BigDecimal SecondValue = BigDecimal.valueOf(Long.parseLong(scanner.nextLine()));
+
+
+        Query query = new Query();
+        query.addCriteria(Criteria.where("totalSpentInBooks").gte(new BigDecimal(String.valueOf(FirstValue))).lte(new BigDecimal(String.valueOf(SecondValue))));
+        return mongoTemplate.find(query, Student.class);
     }
 
     public  void updateStudent(Scanner scanner) {
@@ -91,13 +107,12 @@ public class StudentService {
                     System.out.println("Current details of the student:");
                     System.out.println(existingStudent);
 
-                    // Allow updating specific fields (for simplicity, let's just update the first name)
+
                     System.out.print("Enter new first name: ");
                     String newFirstName = scanner.nextLine();
 
                     existingStudent.setFirstName(newFirstName);
 
-                    // Save the updated student
                     studentRepository.save(existingStudent);
                     System.out.println("Student updated: " + existingStudent);
                 },
@@ -106,6 +121,32 @@ public class StudentService {
     }
 
 
+    public Student findStudentByGenderAndSubject(){
+        Scanner scanner = new Scanner(System.in);
+
+
+        System.out.println("Type the subject you want, press '/' to stop:");
+
+        List<String> favouriteSubjects =  new ArrayList<>();
+        while (true) {
+            String subject = scanner.nextLine();
+
+            if ("/".equals(subject)) {
+                break;}
+            favouriteSubjects.add(subject);
+        }
+        System.out.println("Type the gender you want to search:");
+        Gender gender = Gender.valueOf(scanner.nextLine());
+        System.out.println("Subjects selected: " + favouriteSubjects);
+
+
+        return getStudentByGenderAndFavouriteSubjects(gender,favouriteSubjects);
+    }
+    public Student getStudentByGenderAndFavouriteSubjects(Gender gender,List<String> favouritesubjects){
+        System.out.println("All students:"+studentRepository.findStudentByGenderAndFavouriteSubjects(gender,favouritesubjects));
+        return studentRepository.findStudentByGenderAndFavouriteSubjects(gender, favouritesubjects).stream().findFirst().
+                orElseThrow(() -> new IllegalStateException("No one found with these parameters"));
+    }
 
     public List<Student> getAllStudents() {
         System.out.println("All students:"+ studentRepository.findAll());
@@ -114,7 +155,8 @@ public class StudentService {
 
     public Student getStudentByNameAndGender(String firstName, Gender gender) {
         System.out.println("All students:"+ studentRepository.findByFirstNameAndGender(firstName, gender));
-        return studentRepository.findByFirstNameAndGender(firstName, gender).stream().findFirst().orElseThrow(() -> new IllegalStateException("No one found with these parameters"));
+        return studentRepository.findByFirstNameAndGender(firstName, gender).stream().findFirst().
+                orElseThrow(() -> new IllegalStateException("No one found with these parameters"));
 
     }
 

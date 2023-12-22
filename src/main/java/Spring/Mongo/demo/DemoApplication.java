@@ -36,6 +36,9 @@ public class DemoApplication {
 			System.out.println("4. Delete Student");
 			System.out.println("5. Get By First Name and Gender");
 			System.out.println("6. Get By Favourite Subjects");
+			System.out.println("7. Get By Gender and Favourite Subjects");
+			System.out.println("8. @QUERY example");
+			System.out.println("9. query Criteria");
 			System.out.println("0. Exit");
 			System.out.print("Select an option: ");
 
@@ -60,6 +63,15 @@ public class DemoApplication {
 					break;
 				case 6:
 					studentService.findStudentByFavoriteSubjects();
+					break;
+				case 7:
+					studentService.findStudentByGenderAndSubject();
+					break;
+				case 8:
+					studentService.findStudentByFirstName("Otavio");
+					break;
+				case 9:
+					studentService.findStudentByIntervalo();
 					break;
 				case 0:
 					System.out.println("Exiting program.");
