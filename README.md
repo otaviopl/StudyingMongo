@@ -1,5 +1,5 @@
 Projeto de Estudo sobre Queries no MongoDB
-Este projeto foi criado com o objetivo de aprimorar os conhecimentos sobre a utilização de queries no MongoDB, especialmente no contexto do desenvolvimento com o framework Spring Boot.
+Este projeto foi criado com o objetivo de aprimorar os conhecimentos sobre a utilização de queries no MongoDB.
 
 Objetivo do Projeto
 O foco principal é explorar diferentes formas de realizar consultas (queries) em um banco de dados MongoDB usando o Spring Boot. O projeto visa proporcionar um ambiente de estudo prático, onde diferentes tipos de consultas podem ser experimentados e compreendidos.
